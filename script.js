@@ -22,22 +22,23 @@ document.getElementById('accessible-form').addEventListener('submit', function (
 
 # express js adding
 const express = require('express');
-const bodyParser = require('body-parser');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.json());
+// Set up rate limiting middleware
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
 
-app.post('/webhook', (req, res) => {
-  const eventData = req.body;
+app.use('/api/', apiLimiter);
 
-  // Process the event data as needed (e.g., log it)
-  console.log('Received GitHub Webhook Event:', eventData);
-
-  // Perform actions based on the event (e.g., send real-time notifications)
-
-  res.status(200).send('Webhook Received');
+// Your API route
+app.get('/api/data', (req, res) => {
+  res.json({ message: 'API response data' });
 });
 
 app.listen(port, () => {
